@@ -1,0 +1,25 @@
+databases:
+  - name: encuestas-db
+    databaseName: encuestas_db
+    user: encuestas_user
+    plan: free # Base de datos gratuita (Caduca a los 90 días en la versión free)
+
+services:
+  - type: web
+    name: encuestas-django
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn mysite.wsgi:application"
+    plan: free # Servidor web gratuito (Se duerme tras 15 min de inactividad)
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: encuestas-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "*" # Permite cualquier dominio en Render, puedes cambiarlo por tu URL de render después
+```
