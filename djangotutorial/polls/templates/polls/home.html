@@ -1,0 +1,129 @@
+{% extends 'polls/base.html' %}
+
+{% block title %}Inicio - Portal de Encuestas{% endblock %}
+
+{% block extra_css %}
+<style>
+    .container {
+        width: 100%;
+        max-width: 800px;
+        margin: auto;
+        padding: 2rem;
+        box-sizing: border-box;
+        text-align: center;
+    }
+
+    header {
+        margin-bottom: 3rem;
+    }
+
+    h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        margin: 0;
+        background: linear-gradient(to right, #38bdf8, #818cf8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.05em;
+    }
+
+    p.subtitle {
+        color: var(--text-muted);
+        font-size: 1.25rem;
+        margin-top: 0.5rem;
+    }
+
+    .menu-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    @media (max-width: 600px) {
+        .menu-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .menu-card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 16px;
+        backdrop-filter: blur(12px);
+        padding: 2.5rem 2rem;
+        text-decoration: none;
+        color: var(--text-main);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .menu-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: linear-gradient(to right, #38bdf8, #818cf8);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .menu-card:hover {
+        transform: translateY(-5px);
+        border-color: rgba(56, 189, 248, 0.3);
+        box-shadow: 0 12px 24px -10px var(--glow-color);
+    }
+
+    .menu-card:hover::before {
+        opacity: 1;
+    }
+
+    .card-icon {
+        font-size: 3rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin: 0 0 0.5rem 0;
+    }
+
+    .card-desc {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        line-height: 1.5;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <header>
+        <h1>Bienvenido a la Aplicacion de Encuestas</h1>
+        <p class="subtitle">Descubre preguntas de interés y explora ubicaciones en tiempo real</p>
+    </header>
+
+    <main>
+        <div class="menu-grid">
+            <a href="/polls/" class="menu-card">
+                <span class="card-icon">🎯</span>
+                <h2 class="card-title">Encuestas</h2>
+                <p class="card-desc">Participa en votaciones y ve los resultados de las opiniones de la comunidad.</p>
+            </a>
+            
+            <a href="/mapa/" class="menu-card">
+                <span class="card-icon">🌎</span>
+                <h2 class="card-title">Mapa Interactivo</h2>
+                <p class="card-desc">Explora mapas interactivos y visualiza alcaldias e INFOTEC.</p>
+            </a>
+        </div>
+    </main>
+</div>
+{% endblock %}

@@ -1,0 +1,168 @@
+{% extends 'polls/base.html' %}
+
+{% block title %}Encuestas - Polls App{% endblock %}
+
+{% block extra_css %}
+<style>
+    .container {
+        width: 100%;
+        max-width: 600px;
+        margin: auto;
+        padding: 2rem;
+        box-sizing: border-box;
+    }
+
+    header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin: 0;
+        background: linear-gradient(to right, #38bdf8, #818cf8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.05em;
+    }
+
+    p.subtitle {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        margin-top: 0.5rem;
+    }
+
+    .poll-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .poll-item {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 16px;
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .poll-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(to bottom, #38bdf8, #818cf8);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .poll-item:hover {
+        transform: translateY(-2px);
+        border-color: rgba(56, 189, 248, 0.3);
+        box-shadow: 0 12px 20px -10px var(--glow-color);
+    }
+
+    .poll-item:hover::before {
+        opacity: 1;
+    }
+
+    .poll-link {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1.25rem 1.5rem;
+        color: var(--text-main);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .poll-arrow {
+        color: var(--primary);
+        transition: transform 0.3s ease;
+        font-size: 1.25rem;
+    }
+
+    .poll-item:hover .poll-arrow {
+        transform: translateX(4px);
+    }
+
+    .no-polls {
+        text-align: center;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        padding: 3rem 2rem;
+        border-radius: 16px;
+        backdrop-filter: blur(12px);
+        color: var(--text-muted);
+    }
+
+    .no-polls-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        display: block;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--primary);
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+        transition: color 0.2s ease;
+    }
+
+    .back-link:hover {
+        color: var(--primary-hover);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <header>
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-bottom: 1.5rem;">
+            <a href="{% url 'home' %}" class="back-link" style="margin-bottom: 0;">
+                🏠 Inicio
+            </a>
+            <a href="{% url 'polls:crear_encuesta' %}" class="back-link" style="margin-bottom: 0;">
+                ✍️ Crear Encuesta
+            </a>
+        </div>
+        <h1>Encuestas Disponibles</h1>
+        <p class="subtitle">Selecciona una pregunta para participar</p>
+    </header>
+
+    <main>
+        {% if lista_preguntas_recientes %}
+            <ul class="poll-list">
+            {% for question in lista_preguntas_recientes %}
+                <li class="poll-item">
+                    <a class="poll-link" href="{% url 'polls:detail' question.id %}">
+                        <span>{{ question.pregunta_texto }}</span>
+                        <span class="poll-arrow">→</span>
+                    </a>
+                </li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <div class="no-polls">
+                <span class="no-polls-icon">📥</span>
+                <p>No hay encuestas disponibles en este momento.</p>
+            </div>
+        {% endif %}
+    </main>
+</div>
+{% endblock %}

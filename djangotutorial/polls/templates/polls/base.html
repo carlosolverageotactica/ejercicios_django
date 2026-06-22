@@ -1,0 +1,68 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Portal de Encuestas{% endblock %}</title>
+    
+    <!-- Fuentes Comunes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
+    <!-- Estilos Comunes (Variables y Fondos) -->
+    <style>
+        :root {
+            --bg-color: #203a20;
+            --card-bg: rgba(70, 21, 9, 0.7);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --primary: #38bdf8;
+            --primary-hover: #0ea5e9;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --glow-color: rgba(56, 189, 248, 0.15);
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Outfit', sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(56, 189, 248, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.08) 0px, transparent 50%);
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 2rem 0;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            border-top: 1px solid var(--card-border);
+        }
+    </style>
+    
+    <!-- Bloque para estilos específicos de cada página -->
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar Reutilizable -->
+    {% include 'polls/navbar.html' %}
+
+    <!-- Contenido Dinámico de la Página -->
+    {% block content %}{% endblock %}
+
+    <footer>
+        <p>Desarrollado con Django para Dev INFOTEC &hearts;</p>
+    </footer>
+
+    <!-- Bloque para JS específico de cada página (ej. Leaflet en el mapa) -->
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,87 @@
+{% extends 'polls/base.html' %}
+
+{% block title %}{{ pregunta.pregunta_texto }} - Resultados{% endblock %}
+
+{% block extra_css %}
+<style>
+    .results-card {
+        background: rgba(30, 41, 59, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        padding: 2.5rem;
+        width: 100%;
+        max-width: 500px;
+        text-align: center;
+        margin: auto;
+    }
+
+    h1 {
+        color: #34d399;
+        margin-top: 0;
+    }
+
+    .result-item {
+        background: rgba(15, 23, 42, 0.4);
+        margin-bottom: 1rem;
+        padding: 1.25rem;
+        border-radius: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        font-weight: 600;
+    }
+
+    .vote-count {
+        background: rgba(56, 189, 248, 0.1);
+        color: var(--primary);
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-weight: 800;
+        border: 1px solid rgba(56, 189, 248, 0.15);
+        font-size: 0.85rem;
+    }
+
+    .back-btn {
+        display: inline-block;
+        padding: 1rem 2rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        text-decoration: none;
+        border-radius: 12px;
+        transition: all 0.2s ease;
+    }
+
+    .back-btn:hover {
+        background: rgba(255, 255, 255, 0.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="results-card">
+    <h1>Resultados:</h1>
+    <h2>{{ pregunta.pregunta_texto }}</h2>
+    
+    <div style="margin: 2rem 0; text-align: left;">
+    {% for choice in opciones %}
+        <div class="result-item">
+            <span>{{ choice.opcion_texto }}</span>
+            <span class="vote-count">
+                {{ choice.votos }} voto{{ choice.votos|pluralize }}
+            </span>
+        </div>
+    {% endfor %}
+    </div>
+
+    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem; text-align: center;">
+        Total de votos registrados: <strong>{{ total_votos }}</strong>
+    </p>
+
+    <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;">
+        <a href="{% url 'home' %}" class="back-btn" style="background: rgba(255, 255, 255, 0.05);">🏠 Inicio</a>
+        <a href="{% url 'polls:detail' pregunta.id %}" class="back-btn">¿Votar de nuevo?</a>
+        <a href="{% url 'polls:index' %}" class="back-btn" style="background: #38bdf8; border: none; color: #0f172a;">Ver todas</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,331 @@
+{% extends 'polls/base.html' %}
+{% load static %}
+
+{% block title %}Mapa de ejercicio - Django ejercicio 7{% endblock %}
+
+{% block extra_css %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<style>
+    .container {
+        width: 100%;
+        max-width: 900px;
+        margin: auto;
+        padding: 2rem;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
+    header {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin: 0;
+        background: linear-gradient(to right, #38bdf8, #818cf8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: -0.05em;
+    }
+
+    p.subtitle {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        margin-top: 0.5rem;
+    }
+
+    /* Diseño lado a lado para mapa y panel lateral */
+    #map-wrapper {
+        display: flex;
+        gap: 1.5rem;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        border-radius: 20px;
+        padding: 1.5rem;
+        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(12px);
+        margin-bottom: 2rem;
+    }
+
+    #map {
+        height: 600px;
+        flex-grow: 1;
+        /* El mapa ocupará todo el ancho restante */
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    /* Panel lateral de controles a la derecha */
+    .map-sidebar {
+        width: 250px;
+        min-width: 250px;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        box-sizing: border-box;
+    }
+
+    /* Estilos del Acordeón con Transparencia */
+    .map-sidebar details {
+        background: rgba(15, 23, 42, 0.45);
+        /* Transparencia oscura */
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 12px;
+        overflow: hidden;
+        transition: all 0.3s ease;
+    }
+
+    .map-sidebar details[open] {
+        border-color: rgba(56, 189, 248, 0.2);
+    }
+
+    .map-sidebar summary {
+        padding: 0.85rem 1rem;
+        font-weight: 800;
+        color: var(--primary);
+        cursor: pointer;
+        user-select: none;
+        outline: none;
+        transition: background 0.2s ease;
+    }
+
+    .map-sidebar summary:hover {
+        background: rgba(255, 255, 255, 0.03);
+    }
+
+    .accordion-content {
+        padding: 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+
+    .control-option {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition: color 0.2s ease;
+    }
+
+    .control-option:hover {
+        color: var(--primary);
+    }
+
+    .control-option input {
+        accent-color: var(--primary);
+        cursor: pointer;
+        transform: scale(1.1);
+    }
+
+    /* Responsive: si la pantalla es pequeña, se apilan verticalmente */
+    @media (max-width: 768px) {
+        #map-wrapper {
+            flex-direction: column;
+        }
+
+        .map-sidebar {
+            width: 100%;
+            min-width: 100%;
+        }
+    }
+
+    /* Adaptación del Popup de Leaflet al tema oscuro */
+    .leaflet-popup-content-wrapper,
+    .leaflet-popup-tip {
+        background: #4d0c04 !important;
+        color: var(--text-main) !important;
+        border: 1px solid var(--card-border);
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    .leaflet-popup-content {
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.95rem;
+    }
+
+    .leaflet-popup-close-button {
+        color: var(--text-muted) !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <header>
+        <h1>Alcaldias CDMX</h1>
+        <p class="subtitle">Mapa de Desarrollo</p>
+    </header>
+
+    <main id="map-wrapper">
+        <!-- El Mapa a la izquierda -->
+        <div id="map"></div>
+
+        <!-- Panel lateral tipo Acordeón a la derecha -->
+        <div class="map-sidebar">
+            <!-- Sección de Mapa Base -->
+            <details open>
+                <summary>🗺️ Mapas Base</summary>
+                <div class="accordion-content">
+                    <label class="control-option">
+                        <input type="radio" name="base-layer" value="osm" checked>
+                        <span>Callejero (OSM)</span>
+                    </label>
+                    <label class="control-option">
+                        <input type="radio" name="base-layer" value="satellite">
+                        <span>Satélite</span>
+                    </label>
+                </div>
+            </details>
+
+            <!-- Sección de Capas Superpuestas -->
+            <details open>
+                <summary>🌎 Capas Sobrepuestas</summary>
+                <div class="accordion-content">
+                    <label class="control-option">
+                        <input type="checkbox" id="toggle-alcaldias" checked>
+                        <span>Alcaldías (GeoJSON)</span>
+                    </label>
+                    <label class="control-option">
+                        <span>Opacidad: <span id="opacity-value">100</span>%</span>
+                        <input type="range" id="opacity-slider" min="0" max="100" value="50">
+                    </label>
+                    <label class="control-option">
+                        <input type="checkbox" id="toggle-infotec" checked>
+                        <span>Marcador INFOTEC</span>
+                    </label>
+
+
+                </div>
+            </details>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+    // Inicializar el mapa
+    const map = L.map('map').setView([19.324243730034464, -99.16323823553878], 12);
+
+    const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+        maxZoom: 18
+    });
+
+    const openStreetMapBase = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 24,
+        headers: {
+            'User-Agent': 'MiAppMapas/1.0 (carlosolvera.geotactica@gmail.com)'
+        }
+    });
+
+    openStreetMapBase.addTo(map);
+
+    const alcaldiasGrupo = L.layerGroup().addTo(map);
+    const marcasGrupo = L.layerGroup().addTo(map);
+
+    const mapasBase = {
+        "Vista Satelital": satellite,
+        "Mapa Callejero (OSM)": openStreetMapBase
+    };
+
+    const capasSobrepuestas = {
+        "Alcaldías (GeoJSON)": alcaldiasGrupo,
+        "INFOTEC": marcasGrupo
+    };
+
+    //L.control.layers(mapasBase, capasSobrepuestas, { collapsed: true }).addTo(map);
+
+    const marcaINFOTEC = L.marker([19.317763995717772, -99.16186494460317]);
+    marcaINFOTEC.bindPopup("<b>INFOTEC</b><br><img src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRlcNInk0kuas05wOVkLvb_qVvIyTho17v1PA&s' alt='Descripción de la imagen'>").openPopup();
+    marcaINFOTEC.addTo(marcasGrupo);
+
+    // Cargar GeoJSON de alcaldías
+    fetch("{% static 'polls/alcaldias.geojson' %}")
+        .then(response => response.json())
+        .then(data => {
+            const geojsonCapa = L.geoJSON(data, {
+                onEachFeature: function (feature, layer) {
+                    if (feature.properties && feature.properties.NOMGEO) {
+                        layer.bindPopup(`<b>Alcaldía:</b> ${feature.properties.NOMGEO}`);
+                    }
+                }
+            });
+            geojsonCapa.addTo(alcaldiasGrupo);
+            map.fitBounds(geojsonCapa.getBounds());
+        })
+        .catch(error => console.error('Error cargando el archivo GeoJSON:', error));
+
+
+    // --- CONTROL DE CAPAS PERSONALIZADO ---
+    // Cambiar Mapa Base (OSM o Vista Satelital)
+    document.querySelectorAll('input[name="base-layer"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.value === 'osm') {
+                map.addLayer(openStreetMapBase);
+                map.removeLayer(satellite);
+            } else if (e.target.value === 'satellite') {
+                map.addLayer(satellite);
+                map.removeLayer(openStreetMapBase);
+            }
+        });
+    });
+    // Alternar capa de Alcaldías (GeoJSON CDMX)
+    document.getElementById('toggle-alcaldias').addEventListener('change', (e) => {
+        if (e.target.checked) {
+            map.addLayer(alcaldiasGrupo);
+        } else {
+            map.removeLayer(alcaldiasGrupo);
+        }
+    });
+    // Alternar capa de Marcador INFOTEC
+    document.getElementById('toggle-infotec').addEventListener('change', (e) => {
+        if (e.target.checked) {
+            map.addLayer(marcasGrupo);
+        } else {
+            map.removeLayer(marcasGrupo);
+        }
+    });
+
+    const slider = document.getElementById('opacity-slider');
+    const opacityValue = document.getElementById('opacity-value');
+
+    // 3. Función para actualizar la opacidad
+    function updateOpacity(value) {
+        // Convertir el valor (0-100) a opacidad (0-1)
+        const opacity = value / 100;
+
+        // Actualizar el texto del porcentaje
+        opacityValue.textContent = value;
+
+        // Actualizar la opacidad de la capa
+        alcaldiasGrupo.setStyle({
+            fillOpacity: opacity
+        });
+    }
+
+    // 4. Evento para cuando se mueve el slider
+    slider.addEventListener('input', function (e) {
+        const value = parseInt(e.target.value);
+        updateOpacity(value);
+    });
+
+    // 5. Inicializar con el valor actual del slider
+    updateOpacity(parseInt(slider.value));
+
+</script>
+{% endblock %}
