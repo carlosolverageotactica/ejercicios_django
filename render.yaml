@@ -8,7 +8,7 @@ services:
   - type: web
     name: encuestas-django
     runtime: python
-    rootDirectory: djangotutorial
+    rootDir: djangotutorial
     buildCommand: "./build.sh"
     startCommand: "gunicorn mysite.wsgi:application"
     plan: free # Servidor web gratuito (Se duerme tras 15 min de inactividad)
